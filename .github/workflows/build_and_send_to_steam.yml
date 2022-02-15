@@ -67,33 +67,44 @@ jobs:
           with:
             shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
 
-        - name: Upload to Steam
+        - name: Write release.vdf
           run: |
-            echo "::group::Extracting source"
-            mkdir source
-            (
-              cd source
-              tar -xf ../internal-source/source.tar.gz --strip-components=1
-            )
-            echo "::endgroup::"
-            mkdir steam
-            (
-              cd steam
+            cat << EOF > $GITHUB_WORKSPACE/release.vdf
+              "AppBuild"
+              {
+                "AppID" "1891530" // Your AppID
+                "Desc" "descrt"
 
-              echo "::group::Prepare Win64"
-              unzip ../openttd-windows-x64/openttd-*-windows-win64.zip
-              mv openttd-*-windows-win64 steam-win64
-              echo "::endgroup::"
+                "SetLive" "test"
 
-              echo "::group::Preparing build file"
-              BRANCH="test"
-              cat ../os/steam/release.vdf | sed 's/@@DESCRIPTION@@/openttd-${{ needs.source.outputs.version }}/;s/@@BRANCH@@/'${BRANCH}'/' > release.vdf
-              cat release.vdf
-              echo "::endgroup::"
-              echo "::group::Upload to Steam"
-              steamcmd +login ${{ secrets.STEAM_USERNAME }} ${{ secrets.STEAM_PASSWORD }} ${{ steps.steam-totp.outputs.code }} +run_app_build $(pwd)/release.vdf +quit
-              echo "::endgroup::"
-            )
+                "ContentRoot" "./"
+                "BuildOutput" "build/"
+
+                "Depots"
+                {
+                  "1891532"
+                  {
+                    "ContentRoot" "./build"
+                    "FileMapping"
+                    {
+                      "LocalPath" "*"
+                      "DepotPath" "."
+                      "recursive" "1"
+                    }
+                  }
+                }
+              }
+
+          
+            cat $GITHUB_WORKSPACE/release.vdf
+      
+        - name: Push to Steam Workshop
+          env:
+            STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
+            STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+            STEAM_2FA: ${{ fromJSON(steps.prompt.outputs.code_2fa).options.code }}
+          run: |
+            steamcmd +login $STEAM_USERNAME $STEAM_PASSWORD $STEAM_2FA +workshop_build_item $GITHUB_WORKSPACE/release.vdf +quit
 
       
         # Output
