@@ -102,9 +102,8 @@ jobs:
           env:
             STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
             STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
-            STEAM_2FA: ${{ fromJSON(steps.prompt.outputs.code_2fa).options.code }}
           run: |
-            steamcmd +login $STEAM_USERNAME $STEAM_PASSWORD $STEAM_2FA +workshop_build_item $GITHUB_WORKSPACE/release.vdf +quit
+            steamcmd +login $STEAM_USERNAME $STEAM_PASSWORD ${{ steps.generate-code-for-upload.outputs.code }} +run_app_build $GITHUB_WORKSPACE/release.vdf +quit
 
       
         # Output
