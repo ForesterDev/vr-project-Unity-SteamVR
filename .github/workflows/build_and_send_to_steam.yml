@@ -40,12 +40,12 @@ jobs:
         #      Library-
             
         # Test
-        - name: Unity - Test runner
-          uses: game-ci/unity-test-runner@v2.0-alpha-2
-          env:
-            UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          with:
-            unityVersion: 2020.2.2f1
+        #- name: Unity - Test runner
+        #  uses: game-ci/unity-test-runner@v2.0-alpha-2
+        #  env:
+        #    UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        #  with:
+        #    unityVersion: 2020.2.2f1
             
         # Build
         - name: Unity - Builder
@@ -56,7 +56,46 @@ jobs:
             unityVersion: 2020.2.2f1
             targetPlatform: StandaloneWindows64
             allowDirtyBuild: true
-              
+        
+        # Setup steamcmd
+        - name: Setup steamcmd
+          uses: CyberAndrii/setup-steamcmd@v1.1.1
+      
+        - name: Generate Steam auth code
+          id: steam-totp
+          uses: CyberAndrii/steam-totp@v1.0.2
+          with:
+            shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
+
+        - name: Upload to Steam
+          run: |
+            echo "::group::Extracting source"
+            mkdir source
+            (
+              cd source
+              tar -xf ../internal-source/source.tar.gz --strip-components=1
+            )
+            echo "::endgroup::"
+            mkdir steam
+            (
+              cd steam
+
+              echo "::group::Prepare Win64"
+              unzip ../openttd-windows-x64/openttd-*-windows-win64.zip
+              mv openttd-*-windows-win64 steam-win64
+              echo "::endgroup::"
+
+              echo "::group::Preparing build file"
+              BRANCH="test"
+              cat ../os/steam/release.vdf | sed 's/@@DESCRIPTION@@/openttd-${{ needs.source.outputs.version }}/;s/@@BRANCH@@/'${BRANCH}'/' > release.vdf
+              cat release.vdf
+              echo "::endgroup::"
+              echo "::group::Upload to Steam"
+              steamcmd +login ${{ secrets.STEAM_USERNAME }} ${{ secrets.STEAM_PASSWORD }} ${{ steps.steam-totp.outputs.code }} +run_app_build $(pwd)/release.vdf +quit
+              echo "::endgroup::"
+            )
+
+      
         # Output
         - uses: actions/upload-artifact@v1
           with:
