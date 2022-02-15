@@ -1,0 +1,24 @@
+"AppBuild"
+{
+	"AppID" "1891530" // Your AppID
+	"Desc" "@@DESCRIPTION@@"
+
+	"SetLive" "@@BRANCH@@"
+
+	"ContentRoot" "./"
+	"BuildOutput" "build/"
+
+	"Depots"
+	{
+		"1891532"
+		{
+			"ContentRoot" "./build"
+			"FileMapping"
+			{
+				"LocalPath" "*"
+				"DepotPath" "."
+				"recursive" "1"
+			}
+		}
+	}
+}
