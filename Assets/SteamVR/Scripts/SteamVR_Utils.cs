@@ -233,7 +233,20 @@ public static class SteamVR_Utils
         return path;
     }
 
-    [System.Serializable]
+	public static System.Type FindType(string typeName)
+	{
+		var type = System.Type.GetType(typeName);
+		if (type != null) return type;
+		foreach (var a in System.AppDomain.CurrentDomain.GetAssemblies())
+		{
+			type = a.GetType(typeName);
+			if (type != null)
+				return type;
+		}
+		return null;
+	}
+
+	[System.Serializable]
 	public struct RigidTransform
 	{
 		public Vector3 pos;
