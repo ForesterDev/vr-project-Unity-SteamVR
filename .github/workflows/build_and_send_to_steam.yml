@@ -61,12 +61,6 @@ jobs:
         - name: Setup steamcmd
           uses: CyberAndrii/setup-steamcmd@v1.1.1
       
-        - name: Generate Steam auth code
-          id: steam-totp
-          uses: CyberAndrii/steam-totp@v1.0.2
-          with:
-            shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
-
         - name: Write release.vdf
           run: |
             cat << EOF > $GITHUB_WORKSPACE/release.vdf
@@ -98,12 +92,21 @@ jobs:
           
             cat $GITHUB_WORKSPACE/release.vdf
       
+        - name: Generate auth code for upload
+          uses: CyberAndrii/steam-totp@v1.0.2
+          id: generate-code-for-upload
+          with:
+            shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
+        
         - name: Push to Steam Workshop
           env:
             STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
             STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
           run: |
-            steamcmd +login $STEAM_USERNAME $STEAM_PASSWORD ${{ steps.generate-code-for-upload.outputs.code }} +run_app_build $GITHUB_WORKSPACE/release.vdf +quit
+            steamcmd
+            +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" ${{ steps.generate-code-for-upload.outputs.code }} 
+            +run_app_build $GITHUB_WORKSPACE/release.vdf 
+            +quit
 
       
         # Output
