@@ -60,6 +60,9 @@ jobs:
         # Setup steamcmd
         - name: Setup steamcmd
           uses: CyberAndrii/setup-steamcmd@v1.1.1
+        
+        - name: Update app
+          run: steamcmd +login anonymous +app_update 1337 validate +quit
       
         - name: Write release.vdf
           run: |
