@@ -92,21 +92,18 @@ jobs:
           
             cat $GITHUB_WORKSPACE/release.vdf
       
-        - name: Generate auth code for upload
-          uses: CyberAndrii/steam-totp@v1.0.2
-          id: generate-code-for-upload
+        - uses: game-ci/steam-deploy@v1
           with:
-            shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
-        
-        - name: Push to Steam Workshop
-          env:
-            STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
-            STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
-          run: |
-            steamcmd
-            +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" 
-            +run_app_build $GITHUB_WORKSPACE/release.vdf 
-            +quit
+            username: ${{ secrets.STEAM_USERNAME }}
+            password: ${{ secrets.STEAM_PASSWORD }}
+            configVdf: ${{ secrets.STEAM_CONFIG_VDF}}
+            ssfnFileName: ${{ secrets.STEAM_SSFN_FILE_NAME }}
+            ssfnFileContents: ${{ secrets.STEAM_SSFN_FILE_CONTENTS }}
+            appId: 1891530
+            buildDescription: v1.2.3
+            rootPath: build
+            depot1Path: StandaloneWindows64
+            releaseBranch: test
 
       
         # Output
