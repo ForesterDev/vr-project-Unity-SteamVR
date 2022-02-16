@@ -107,7 +107,7 @@ jobs:
             STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
           run: |
             steamcmd
-            +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" ${{ steps.generate-code-for-upload.outputs.code }} 
+            +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" 
             +run_app_build $GITHUB_WORKSPACE/release.vdf 
             +quit
 
