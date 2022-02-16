@@ -1,13 +1,14 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
-on:
-  pull_request: {}
-  push: { branches: [ main ] }
+on: 
+  workflow_dispatch:
+    inputs:
+      activate-unity:
+        description: 'Publish to Beta'
+        required: false
 
 jobs:
   build:
